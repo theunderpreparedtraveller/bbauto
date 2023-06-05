@@ -4,6 +4,8 @@ import sys
 import os
 import subprocess
 import json
+import mysql
+import conn
 def verify(domain,data):
 	if "/" in data:
 		pass
@@ -57,6 +59,12 @@ def vt(url,limit):
 	f = open("response-db","w")
 	f.write(response)
 	f.close()
+def push_to_db(url):
+	obj = conn.conn()
+	cursor = obj[1]
+	mydb = obj[0]
+	cursor.execute("INSERT INTO vuln_table (url,port,service) VALUES('"+url+"',0,'None')")
+	mydb.commit()
 def read_vt():
 	f = open("response-db","r")
 	data = f.read()
@@ -65,11 +73,12 @@ def read_vt():
 	i = 0
 	while(i<int(sys.argv[2])):
 		try:
-			print(data["data"][i]["id"])
+			push_to_db(data["data"][i]["id"])
 		except:
-			print("No more subdomains")
-			sys.exit()
+			print("No subdomains")
 		i=i+1
-monitor()
+		
+#monitor()
 vt(sys.argv[1],sys.argv[2])
 read_vt()
+
